@@ -1,0 +1,171 @@
+body {
+    margin: 0;
+    font-family: "Segoe UI", "Inter", sans-serif;
+    background: #0f0f0f;
+    color: white;
+    overflow: hidden;
+}
+
+/* Background Blur */
+.bg {
+    background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e") center/cover;
+    filter: brightness(0.25) blur(3px);
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+}
+
+/* Chat area */
+.chat-container {
+    height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding: 50px 0 100px;
+}
+
+/* Bot Message – Copilot Card */
+.bot {
+    max-width: 850px;
+    margin: 0 auto 25px;
+    padding: 22px 28px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* User message */
+.user {
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: 40px;
+    margin-bottom: 25px;
+    background: #4c8df6;
+    padding: 12px 22px;
+    border-radius: 18px;
+    font-size: 18px;
+}
+
+/* Input Bar – Copilot Style */
+.chat-bar {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 950px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 40px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    backdrop-filter: blur(15px);
+}
+
+/* Input */
+.chat-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    outline: none;
+}
+
+/* Send button */
+#sendBtn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #4c8df6;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#sendBtn svg { fill: white; width: 22px; }
+
+/* MIC + VOICE UI */
+.mic-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mic-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.mic-btn svg { width: 22px; fill: black; }
+
+/* tiny voice bars */
+.voice-bars { display:flex; gap:4px; }
+.voice-bars div {
+    width: 4px;
+    height: 10px;
+    background: white;
+    border-radius: 4px;
+}
+
+/* Recording animation */
+.recording .voice-bars div:nth-child(1) { animation: bars .4s infinite alternate; }
+.recording .voice-bars div:nth-child(2) { animation: bars .5s infinite alternate; }
+.recording .voice-bars div:nth-child(3) { animation: bars .3s infinite alternate; }
+
+@keyframes bars {
+    from { height: 6px; }
+    to   { height: 22px; }
+}
+
+/* Voice selector */
+.voice-btn {
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    border:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+}
+.voice-btn svg { width: 20px; fill:white; }
+
+.voice-menu {
+    position: absolute;
+    bottom: 70px;
+    right: 35px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 8px 12px;
+    border-radius: 10px;
+    display: none;
+}
+
+.voice-menu div {
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.voice-menu div:hover {
+    background: rgba(255,255,255,0.25);
+}
+  .left-icon svg {
+        fill: white;
+        width: 28px;
+        cursor: pointer;
+    }

@@ -27,39 +27,39 @@ model = WhisperModel("small", device="cpu", compute_type="int8")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-
 @app.post("/record-mic")
 async def record_mic():
     r = sr.Recognizer()
-    r.energy_threshold = 200  # less sensitive
-    r.pause_threshold = 2.0   # wait after silence
+    r.energy_threshold = 200
+    r.pause_threshold = 2.0
     r.dynamic_energy_threshold = True
 
     try:
         with sr.Microphone(sample_rate=16000) as source:
-            print(" Listening...")
-            # make mic stable
+            print("Listening...")
             r.adjust_for_ambient_noise(source, duration=0.3)
-
-            audio_data = r.listen(
-                source,
-                timeout=15,            # increased timeout
-                phrase_time_limit=20
-            )
-
+            audio_data = r.listen(source, timeout=15, phrase_time_limit=20)
     except sr.WaitTimeoutError:
-        print(" No speech detected")
+        print("No speech detected")
         return {"text": ""}
 
-    # Convert raw → int16 → float32
-    raw = audio_data.get_raw_data()
-    # Convert to WAV buffer
+    # Convert raw → WAV bytes
     buffer = io.BytesIO()
     with wave.open(buffer, "wb") as wf:
         wf.setnchannels(1)
         wf.setsampwidth(2)
         wf.setframerate(16000)
-        wf.writeframes(raw)
+        wf.writeframes(audio_data.get_raw_data())
+    buffer.seek(0)
+
+    # Return as StreamingResponse
+    return StreamingResponse(buffer, media_type="audio/wav")
+from fastapi import UploadFile, File
+
+@app.post("/convert")
+async def convert(file: UploadFile = File(...)):
+    audio_bytes = await file.read()
+    buffer = io.BytesIO(audio_bytes)
     buffer.seek(0)
 
     # Whisper transcription

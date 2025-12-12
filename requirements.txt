@@ -10,3 +10,6 @@ langchain-huggingface
 faiss-cpu
 google-generativeai
 faster-whisper
+sentence-transformers
+
+

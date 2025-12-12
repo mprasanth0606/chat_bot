@@ -1,10 +1,11 @@
 
-# pip install ollama langchain-ollama pypdf faiss-cpu langchain-community
-import ollama
+# pip install faiss-cpu langchain-community
 from pypdf import PdfReader
-from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
-
+from langchain_huggingface import HuggingFaceEmbeddings
+#pip install google-generativeai
+import google.generativeai as genai
+  
 # -------------------------------
 # 1. LOAD PDF
 # -------------------------------
@@ -32,41 +33,14 @@ def chunk_text(text, chunk_size=500, chunk_overlap=100):
 # -------------------------------
 # 3. BUILD VECTOR STORE
 # -------------------------------
+
 def build_vector_store(chunks):
-    embed_model = OllamaEmbeddings(model="nomic-embed-text")  # must be pulled first
+    embed_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectordb = FAISS.from_texts(chunks, embed_model)
     return vectordb
 
 # -------------------------------
-# 4. RAG CHAT FUNCTION
-# -------------------------------
-
-def rag_chat(query, vectordb, llm_model="qwen3:4b"):
-    results = vectordb.similarity_search(query, k=3)
-    context = "\n\n".join([r.page_content for r in results])
-
-    prompt = f"""
-You are an Time sheet assistant. Answer the question based ONLY on the context below.
-
-CONTEXT:
-{context}
-
-QUESTION:
-{query}
-
-ANSWER:
-"""
-    # Latest Ollama SDK usage
-    response = ollama.chat(
-        model=llm_model,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    print(response)
-    # Extract the generated text
-    answer_text = response.message.content
-    return answer_text
-# -------------------------------
-# 5. MAIN WORKFLOW
+#  MAIN WORKFLOW
 # -------------------------------
 pdf_path = "data/timesheet_user_manual.pdf"
 
@@ -81,40 +55,18 @@ vectordb = build_vector_store(chunks)
 
 print("RAG system ready! Ask your  questions.\n")
 
-# -------------------------------
-# 6. CHAT LOOP
-# -------------------------------
-# while True:
-#     query = input("Ask your  question (or type 'exit'): ")
-#     if query.lower() == "exit":
-#         print("Exiting...")
-#         break
-
-#     # Get AI answer
-#     answer = rag_chat(query, vectordb, llm_model="qwen3:4b")
-
-#     # Print only question and answer
-#     print("\nQuestion:", query)
-#     print("Answer:", answer)
-#     print("-" * 50)
-
-    # -------------------------------
+#     -------------------------------
 # RAG CHAT FUNCTION FOR API
 # -------------------------------
-
-def get_rag_answer(query, vectordb, llm_model="qwen3:4b"):
-    """
-    Takes a question string and returns only the AI-generated answer text.
-    Ensures no extra text, no printing, no context — just the plain answer.
-    """
-    # Retrieve top relevant documents
+  # Set  API key
+genai.configure(api_key="AIzaSyDoirawD9ookfOjQ300zT4U2_zWyzQEHXk")
+def get_rag_answer(query, vectordb, llm_model="gemini-2.5-flash"):
     results = vectordb.similarity_search(query, k=3)
     context = "\n\n".join([r.page_content for r in results])
 
-    #  Prompt the model to respond with ONLY the answer
     prompt = f"""
-You are a Timesheet assistant. Answer the question using ONLY the context below.
-Do NOT add explanations, preambles, or extra text. Provide the plain answer.
+You are a Time Sheet assistant.
+Answer the question based ONLY on the context below.
 
 CONTEXT:
 {context}
@@ -124,10 +76,7 @@ QUESTION:
 
 ANSWER:
 """
-    response = ollama.chat(
-        model=llm_model,
-        messages=[{"role": "user", "content": prompt}]
-    )
 
-    #  Return just the answer
-    return response.message.content.strip()
+    model = genai.GenerativeModel(llm_model)
+    response = model.generate_content(prompt)
+    return response.text

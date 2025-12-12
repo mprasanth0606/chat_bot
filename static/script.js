@@ -109,3 +109,66 @@ function appendChat(sender, text) {
     container.appendChild(div);
     container.scrollTop = container.scrollHeight; // auto-scroll
 }
+ isRecording = false;
+let mediaRecorder;
+let audioChunks = [];
+let recordTimerInterval;
+let seconds = 0;
+let recordedAudioBlob = null;
+
+async function recordAudio() {
+    recordControls.querySelector("button[onclick*='true']").style.display = "block";
+    recordControls.querySelector("button[onclick*='false']").style.display = "block";
+    if (isRecording) return;
+
+    isRecording = true;
+    audioChunks = [];
+    seconds = 0;
+    document.getElementById("recordControls").style.display = "flex";
+    document.getElementById("micWrapper").classList.add("recording");
+
+    recordTimerInterval = setInterval(() => {
+        seconds++;
+        const min = String(Math.floor(seconds/60)).padStart(2,'0');
+        const sec = String(seconds%60).padStart(2,'0');
+        document.getElementById("recordTimer").textContent = `${min}:${sec}`;
+    }, 1000);
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.start();
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+}
+
+async function finishRecording(save) {
+    clearInterval(recordTimerInterval);
+    isRecording = false;
+
+    // Hide ✔ and ✖ during conversion
+    recordControls.querySelector("button[onclick*='true']").style.display = "none";
+    recordControls.querySelector("button[onclick*='false']").style.display = "none";
+
+    mediaRecorder.stop();
+    mediaRecorder.onstop = async () => {
+        if (!save) {
+            audioChunks = [];
+            recordedAudioBlob = null;
+            document.getElementById("recordControls").style.display = "none";
+            document.getElementById("micWrapper").classList.remove("recording");
+            return;
+        }
+
+        recordedAudioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("file", recordedAudioBlob, "recorded.webm");
+
+        const res = await fetch("/convert", { method: "POST", body: formData });
+        const data = await res.json();
+        document.getElementById("chatInput").value = data.text;
+        document.getElementById("micWrapper").classList.remove("recording");
+
+        recordedAudioBlob = null;
+        audioChunks = [];
+        document.getElementById("recordControls").style.display = "none";
+    };
+}

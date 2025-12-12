@@ -59,7 +59,7 @@ print("RAG system ready! Ask your  questions.\n")
 # RAG CHAT FUNCTION FOR API
 # -------------------------------
   # Set  API key
-genai.configure(api_key="AIzaSyDoirawD9ookfOjQ300zT4U2_zWyzQEHXk")
+genai.configure(api_key="AIzaSyA3bjzMIGNx32xmNkD84qwMv5PkZqgqZWo")
 def get_rag_answer(query, vectordb, llm_model="gemini-2.5-flash"):
     results = vectordb.similarity_search(query, k=3)
     context = "\n\n".join([r.page_content for r in results])

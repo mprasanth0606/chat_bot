@@ -5,6 +5,8 @@ pyttsx3
 speechrecognition
 pypdf
 langchain
+langchain-community
+langchain-huggingface 
 faiss-cpu
 google-generativeai
 faster-whisper
